@@ -21,7 +21,7 @@ DATABASE_URL  = os.environ.get("DATABASE_URL")
 IRS_BASE      = "https://apps.irs.gov/pub/epostcard/990/xml"
 NS            = {'irs': 'http://www.irs.gov/efile'}
 TEST_MODE     = False
-YEARS         = [2023]
+YEARS         = [2023, 2024, 2025]
 ZIP_SUFFIXES  = ['01A','02A','03A','04A','05A','06A','07A','08A','09A','10A']
 TMP_ZIP_PATH  = '/tmp/irs_990_current.zip'
 MAX_ZIP_MB    = 400   # skip zips larger than this
@@ -111,19 +111,19 @@ def main():
     # Load target EINs
     cur.execute("SELECT DISTINCT ein FROM organizations")
     target_eins = set()
-    for (e,) in cur.fetchall():
+    for (e, yr) in cur.fetchall():
         n = normalize_ein(e)
         if n:
             target_eins.add(n)
     log.info(f"Target EINs loaded: {len(target_eins)}")
 
     # Track already-processed EINs for resume support
-    cur.execute("SELECT DISTINCT ein FROM personnel")
+    cur.execute("SELECT DISTINCT ein, tax_prd_yr FROM personnel")
     done_eins = set()
-    for (e,) in cur.fetchall():
+    for (e, yr) in cur.fetchall():
         n = normalize_ein(e)
         if n:
-            done_eins.add(n)
+            done_eins.add((n, yr))
     log.info(f"Already have personnel for {len(done_eins)} EINs — will skip these")
 
     total_inserted = 0
@@ -173,7 +173,7 @@ def main():
                             continue
 
                         # Skip if we already have this EIN's personnel
-                        if ein in done_eins:
+                        if (ein, year) in done_eins:
                             skipped += 1
                             xml = root = None
                             continue
