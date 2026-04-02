@@ -111,7 +111,7 @@ def main():
     # Load target EINs
     cur.execute("SELECT DISTINCT ein FROM organizations")
     target_eins = set()
-    for (e, yr) in cur.fetchall():
+    for (e,) in cur.fetchall():
         n = normalize_ein(e)
         if n:
             target_eins.add(n)
