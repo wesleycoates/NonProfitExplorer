@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict UPWW74zZ0HCHsLTZuzYISKrlLUV2qZFEYRluL6FuW84Yvklya9LVYACTx0qpEba
+\restrict l4S6pxqD2wH0d5vwA3mQz5t8eMTdwWZeCYaOKcNGycKcVoe68IUUTtxVcV2gwGN
 
 -- Dumped from database version 15.17 (Debian 15.17-1.pgdg12+1)
 -- Dumped by pg_dump version 15.17 (Debian 15.17-1.pgdg12+1)
@@ -217,6 +217,51 @@ CREATE TABLE public.organizations (
 ALTER TABLE public.organizations OWNER TO postgres;
 
 --
+-- Name: personnel; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.personnel (
+    id integer NOT NULL,
+    filing_id integer,
+    ein character varying(10),
+    tax_prd_yr smallint,
+    person_name text,
+    title text,
+    compensation bigint,
+    related_comp bigint,
+    other_comp bigint,
+    hours_per_week numeric(5,1),
+    is_officer boolean,
+    is_key_employee boolean,
+    ingested_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.personnel OWNER TO postgres;
+
+--
+-- Name: personnel_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.personnel_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.personnel_id_seq OWNER TO postgres;
+
+--
+-- Name: personnel_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.personnel_id_seq OWNED BY public.personnel.id;
+
+
+--
 -- Name: pipeline_runs; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -325,6 +370,13 @@ ALTER TABLE ONLY public.filings ALTER COLUMN id SET DEFAULT nextval('public.fili
 
 
 --
+-- Name: personnel id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.personnel ALTER COLUMN id SET DEFAULT nextval('public.personnel_id_seq'::regclass);
+
+
+--
 -- Name: pipeline_runs id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -369,6 +421,22 @@ ALTER TABLE ONLY public.filings
 
 ALTER TABLE ONLY public.organizations
     ADD CONSTRAINT organizations_pkey PRIMARY KEY (ein);
+
+
+--
+-- Name: personnel personnel_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.personnel
+    ADD CONSTRAINT personnel_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: personnel personnel_unique_person; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.personnel
+    ADD CONSTRAINT personnel_unique_person UNIQUE (ein, tax_prd_yr, person_name, title);
 
 
 --
@@ -464,6 +532,27 @@ CREATE INDEX idx_org_subseccd ON public.organizations USING btree (subseccd);
 
 
 --
+-- Name: idx_personnel_compensation; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_personnel_compensation ON public.personnel USING btree (compensation DESC);
+
+
+--
+-- Name: idx_personnel_ein; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_personnel_ein ON public.personnel USING btree (ein);
+
+
+--
+-- Name: idx_personnel_filing_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_personnel_filing_id ON public.personnel USING btree (filing_id);
+
+
+--
 -- Name: ai_analyses ai_analyses_filing_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -477,6 +566,14 @@ ALTER TABLE ONLY public.ai_analyses
 
 ALTER TABLE ONLY public.filings
     ADD CONSTRAINT filings_ein_fkey FOREIGN KEY (ein) REFERENCES public.organizations(ein) ON DELETE CASCADE;
+
+
+--
+-- Name: personnel personnel_filing_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.personnel
+    ADD CONSTRAINT personnel_filing_id_fkey FOREIGN KEY (filing_id) REFERENCES public.filings(id) ON DELETE CASCADE;
 
 
 --
@@ -515,6 +612,20 @@ GRANT ALL ON TABLE public.organizations TO nonprofit_user;
 
 
 --
+-- Name: TABLE personnel; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.personnel TO nonprofit_user;
+
+
+--
+-- Name: SEQUENCE personnel_id_seq; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT SELECT,USAGE ON SEQUENCE public.personnel_id_seq TO nonprofit_user;
+
+
+--
 -- Name: TABLE pipeline_runs; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -532,5 +643,5 @@ GRANT ALL ON SEQUENCE public.pipeline_runs_id_seq TO nonprofit_user;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict UPWW74zZ0HCHsLTZuzYISKrlLUV2qZFEYRluL6FuW84Yvklya9LVYACTx0qpEba
+\unrestrict l4S6pxqD2wH0d5vwA3mQz5t8eMTdwWZeCYaOKcNGycKcVoe68IUUTtxVcV2gwGN
 
