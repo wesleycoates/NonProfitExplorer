@@ -1,0 +1,14 @@
+[Unit]
+Description=NonProfit Explorer Flask API
+After=network.target postgresql.service
+
+[Service]
+User=matthewroberts79
+WorkingDirectory=/home/matthewroberts79
+Environment="DATABASE_URL=postgresql://nonprofit_user:NonProfitDB!2026@localhost/nonprofits"
+ExecStart=/usr/bin/python3 /home/matthewroberts79/api.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
