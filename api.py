@@ -1,6 +1,8 @@
 
 import os
-from flask import Flask, jsonify, request
+from dotenv import load_dotenv
+load_dotenv(os.path.expanduser("~/.env"))
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import psycopg2
 import psycopg2.extras
@@ -161,7 +163,6 @@ def org_detail(ein):
             f.totfuncexpns,
             f.surplus,
             f.margin_pct,
-            f.prior_yr_margin,
             f.totassetsend,
             f.netassetsend,
             f.noemployees,
@@ -194,8 +195,8 @@ def org_detail(ein):
                 p.compensation                                          AS base_comp,
                 p.related_comp,
                 p.other_comp,
-                (p.compensation + p.related_comp + p.other_comp)        AS total_comp,
-                LAG(p.compensation + p.related_comp + p.other_comp)
+                (p.compensation + COALESCE(p.related_comp, 0) + COALESCE(p.other_comp, 0))        AS total_comp,
+                LAG(p.compensation + COALESCE(p.related_comp, 0) + COALESCE(p.other_comp, 0))
                     OVER (PARTITION BY p.ein, p.person_name
                           ORDER BY p.tax_prd_yr)                        AS prior_yr_total_comp,
                 p.tax_prd_yr
@@ -234,6 +235,10 @@ def org_detail(ein):
         "personnel": personnel,
     })
 
+
+@app.route("/")
+def index():
+    return send_from_directory("/home/matthewroberts79", "nonprofit_explorer.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)

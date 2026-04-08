@@ -134,7 +134,7 @@
     <h1>NonProfit Personnel Explorer</h1>
     <p>Enter your API server address to connect to the live database.</p>
     <label class="connect-label">API URL</label>
-    <input class="connect-input" id="api-url-input" type="text" value="http://136.113.246.235:5000" spellcheck="false"/>
+    <input class="connect-input" id="api-url-input" type="text" value="http://34.170.166.83:5000" spellcheck="false"/>
     <button class="connect-btn" id="connect-btn">Connect</button>
     <div class="connect-error" id="connect-error"></div>
     <p class="connect-note">Data is served from your GCP VM. Nothing is sent to any third-party server.</p>
@@ -182,6 +182,9 @@
 </div>
 
 <script>
+if (window.location.protocol !== 'file:') {
+  document.getElementById('api-url-input').value = window.location.origin;
+}
 // ── Utilities ─────────────────────────────────────────────────────────────────
 const fc = n => { const v=parseFloat(n); if(isNaN(v)||n===null||n==='')return'—'; const a=Math.abs(v); const s=v<0?'-':''; if(a>=1e9)return`${s}$${(a/1e9).toFixed(1)}B`; if(a>=1e6)return`${s}$${(a/1e6).toFixed(1)}M`; if(a>=1e3)return`${s}$${Math.round(a/1e3)}K`; return`${s}$${Math.round(a)}`; };
 const fp = n => { const v=parseFloat(n); if(isNaN(v)||n===null||n==='')return'—'; return`${v>0?'+':''}${v.toFixed(1)}%`; };

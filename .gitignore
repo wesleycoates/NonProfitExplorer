@@ -1,0 +1,14 @@
+# Never commit credentials
+.env
+*.env
+
+# Python noise
+__pycache__/
+*.pyc
+*.pyo
+
+# Log files
+*.log
+
+# Misc
+.DS_Store
